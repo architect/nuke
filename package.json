@@ -26,6 +26,7 @@
     "@architect/inventory": "~2.0.4",
     "@architect/utils": "~3.0.2",
     "aws-sdk": "2.880.0",
+    "lodash.chunk": "~4.2.0",
     "run-parallel": "~1.2.0",
     "run-waterfall": "~1.1.7"
   },

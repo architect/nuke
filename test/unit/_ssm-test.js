@@ -70,7 +70,7 @@ test('deleteAll should handle SSM parameter paths that contain more than 10 para
   t.plan(2)
   let paramsDeleted = []
   aws.mock('SSM', 'deleteParameters', (params, cb) => {
-    paramsDeleted = params.Names
+    paramsDeleted = paramsDeleted.concat(params.Names)
     cb(null, {})
   })
   let appParams = []

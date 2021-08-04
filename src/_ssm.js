@@ -1,5 +1,6 @@
 let aws = require('aws-sdk')
 let parallel = require('run-parallel')
+let chunk = require('lodash.chunk')
 
 /**
  *
@@ -51,13 +52,16 @@ module.exports = {
     parallel([ `/${appname}/${env}`, `/${appname}/deploy` ].map(path => collectByPath.bind(null, path, null)), function paramsCollected (err, res) {
       if (err) callback(err)
       else {
-        // combine all the various parameters by different path names into a single array
-        let Names = res.reduce((aggregate, current) => aggregate.concat(current), [])
         // While unlikely, it's possible for an app to have no SSM params
         // ... and when that happens, the following call will fail without things to delete
-        if (Names.length) {
+        if (res.length && res[0].length) {
           // byebye
-          ssm.deleteParameters({ Names }, function deleteParameters (err) {
+          parallel(res.map((names) => function gotParams (callback) {
+            const chunks = chunk(names, 10)
+            parallel(chunks.map((Names) => function paramsChunked (callback) {
+              ssm.deleteParameters({ Names }, callback)
+            }), callback)
+          }), function deleteParameters (err) {
             if (err) callback(err)
             else callback()
           })
